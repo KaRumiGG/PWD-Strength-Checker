@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -21,7 +21,7 @@
       padding: 30px;
       border-radius: 15px;
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       text-align: center;
       box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
       border: 1px solid rgba(255,255,255,0.08);
@@ -64,7 +64,15 @@
       border-radius: 6px;
     }
     #feedback { font-size: 14px; margin-bottom: 10px; color: #ddd; }
-    #emoji { font-size: 20px; margin-left: 8px; }
+    #emoji {
+      font-size: 20px;
+      margin-left: 8px;
+      animation: bounce 0.3s ease-in-out;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
     .checklist {
       text-align: left;
       font-size: 14px;
@@ -73,6 +81,18 @@
     }
     .checklist li { margin-bottom: 5px; }
     .checklist .met { color: #7CFC00; }
+    button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #8be9fd;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #breach-warning { color: #ff4c4c; margin-top: 10px; font-size: 14px; }
+    #breach-count { color: #aaa; margin-top: 6px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -91,7 +111,9 @@
       <li id="number">❌ At least 1 number</li>
       <li id="special">❌ At least 1 special character</li>
     </ul>
-    <p id="breach-warning" style="color: #ff4c4c; margin-top: 10px;"></p>
+    <p id="breach-warning"></p>
+    <div id="breach-count"></div>
+    <button onclick="generatePassword()">Generate Strong Password</button>
   </div>
   <script>
     function checkStrength() {
@@ -156,10 +178,22 @@
       }
     }
 
+    function generatePassword() {
+      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+      let pwd = "";
+      for (let i = 0; i < 12; i++) {
+        pwd += charset[Math.floor(Math.random() * charset.length)];
+      }
+      document.getElementById("password").value = pwd;
+      checkStrength();
+    }
+
     async function checkHIBP(password) {
       const warning = document.getElementById("breach-warning");
+      const countDiv = document.getElementById("breach-count");
       if (password.length === 0) {
         warning.textContent = "";
+        countDiv.innerHTML = "";
         return;
       }
       const hash = await sha1(password);
@@ -171,9 +205,11 @@
         const found = text.split("\n").find(line => line.startsWith(suffix));
         if (found) {
           const count = found.split(":")[1].trim();
-          warning.textContent = `⚠️ This password was found in ${count} breaches. Choose another.`;
+          warning.innerHTML = `⚠️ This password was found in ${count} breaches.`;
+          countDiv.innerHTML = `<progress value="${count}" max="1000000"></progress><br/><small>Higher count = more dangerous</small>`;
         } else {
           warning.textContent = `✅ This password was not found in known breaches.`;
+          countDiv.innerHTML = "";
         }
       } catch (error) {
         warning.textContent = "⚠️ Error checking password breach status.";
