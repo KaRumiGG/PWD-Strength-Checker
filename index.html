@@ -82,14 +82,18 @@
     .checklist li { margin-bottom: 5px; }
     .checklist .met { color: #7CFC00; }
     button {
-      margin-top: 15px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
       background: #8be9fd;
-      color: #000;
-      font-weight: bold;
+      color: #1e1e1e;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #50fa7b;
     }
     #breach-warning { color: #ff4c4c; margin-top: 10px; font-size: 14px; }
     #breach-count { color: #aaa; margin-top: 6px; font-size: 13px; }
@@ -113,7 +117,10 @@
     </ul>
     <p id="breach-warning"></p>
     <div id="breach-count"></div>
-    <button onclick="generatePassword()">Generate Strong Password</button>
+    <div style="margin-bottom: 12px;">
+      <button onclick="generatePassword()">Generate Password</button>
+      <button onclick="copyPassword()">Copy to Clipboard</button>
+    </div>
   </div>
   <script>
     function checkStrength() {
@@ -179,13 +186,36 @@
     }
 
     function generatePassword() {
-      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
-      let pwd = "";
-      for (let i = 0; i < 12; i++) {
-        pwd += charset[Math.floor(Math.random() * charset.length)];
+      const lower = "abcdefghijklmnopqrstuvwxyz";
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const nums = "0123456789";
+      const special = "!@#$%^&*()-_=+[]{};:,.<>?";
+
+      let pwd = [
+        lower[Math.floor(Math.random() * lower.length)],
+        upper[Math.floor(Math.random() * upper.length)],
+        nums[Math.floor(Math.random() * nums.length)],
+        special[Math.floor(Math.random() * special.length)]
+      ];
+
+      const all = lower + upper + nums + special;
+      for (let i = 4; i < 12; i++) {
+        pwd.push(all[Math.floor(Math.random() * all.length)]);
       }
-      document.getElementById("password").value = pwd;
+
+      pwd = pwd.sort(() => Math.random() - 0.5).join("");
+
+      const input = document.getElementById("password");
+      input.value = pwd;
       checkStrength();
+    }
+
+    function copyPassword() {
+      const password = document.getElementById("password").value;
+      if (!password) return alert("No password to copy.");
+      navigator.clipboard.writeText(password).then(() => {
+        alert("Password copied to clipboard!");
+      });
     }
 
     async function checkHIBP(password) {
@@ -204,7 +234,7 @@
         const text = await response.text();
         const found = text.split("\n").find(line => line.startsWith(suffix));
         if (found) {
-          const count = found.split(":")[1].trim();
+          const count = found.split(":"")[1].trim();
           warning.innerHTML = `⚠️ This password was found in ${count} breaches.`;
           countDiv.innerHTML = `<progress value="${count}" max="1000000"></progress><br/><small>Higher count = more dangerous</small>`;
         } else {
