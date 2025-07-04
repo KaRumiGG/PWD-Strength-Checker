@@ -20,11 +20,10 @@
       background: rgba(33, 33, 52, 0.95);
       padding: 30px;
       border-radius: 15px;
-      width: 100%;
       max-width: 440px;
+      width: 100%;
       text-align: center;
       box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
-      border: 1px solid rgba(255,255,255,0.08);
     }
     h2 { margin-bottom: 20px; color: #8be9fd; }
     .input-group { position: relative; }
@@ -60,18 +59,17 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(to right, #ff4d4d, #ffa94d, #f6f94d, #4dfc58, #4dffc2);
-      transition: width 0.3s ease-in-out, background 0.3s ease-in-out;
+      transition: width 0.3s ease-in-out;
       border-radius: 6px;
     }
-    #feedback { font-size: 14px; margin-bottom: 10px; color: #ddd; }
+    #feedback {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #ddd;
+    }
     #emoji {
       font-size: 20px;
       margin-left: 8px;
-      animation: bounce 0.3s ease-in-out;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
     }
     .checklist {
       text-align: left;
@@ -91,12 +89,21 @@
       font-weight: bold;
       transition: background 0.3s;
       margin-top: 10px;
+      margin-right: 6px;
     }
     button:hover {
       background: #50fa7b;
     }
-    #breach-warning { color: #ff4c4c; margin-top: 10px; font-size: 14px; }
-    #breach-count { color: #aaa; margin-top: 6px; font-size: 13px; }
+    #breach-warning {
+      color: #ff4c4c;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #breach-count {
+      color: #aaa;
+      margin-top: 6px;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -117,11 +124,12 @@
     </ul>
     <p id="breach-warning"></p>
     <div id="breach-count"></div>
-    <div style="margin-bottom: 12px;">
+    <div>
       <button onclick="generatePassword()">Generate Password</button>
       <button onclick="copyPassword()">Copy to Clipboard</button>
     </div>
   </div>
+
   <script>
     function checkStrength() {
       const password = document.getElementById("password").value;
@@ -130,7 +138,6 @@
       const emoji = document.getElementById("emoji");
 
       let strength = 0;
-
       const hasLength = password.length >= 8;
       const hasUpper = /[A-Z]/.test(password);
       const hasLower = /[a-z]/.test(password);
@@ -155,8 +162,7 @@
       document.getElementById("special").className = hasSpecial ? "met" : "";
 
       const widthPercent = (strength / 5) * 100;
-
-      let color = "", text = "", icon = "";
+      let color = "gray", text = "Start typing...", icon = "🔒";
       switch (strength) {
         case 0:
         case 1: color = "red"; text = "Very Weak"; icon = "😬"; break;
@@ -190,23 +196,18 @@
       const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       const nums = "0123456789";
       const special = "!@#$%^&*()-_=+[]{};:,.<>?";
-
       let pwd = [
         lower[Math.floor(Math.random() * lower.length)],
         upper[Math.floor(Math.random() * upper.length)],
         nums[Math.floor(Math.random() * nums.length)],
-        special[Math.floor(Math.random() * special.length)]
+        special[Math.floor(Math.random() * special.length)],
       ];
-
       const all = lower + upper + nums + special;
       for (let i = 4; i < 12; i++) {
         pwd.push(all[Math.floor(Math.random() * all.length)]);
       }
-
       pwd = pwd.sort(() => Math.random() - 0.5).join("");
-
-      const input = document.getElementById("password");
-      input.value = pwd;
+      document.getElementById("password").value = pwd;
       checkStrength();
     }
 
@@ -221,7 +222,7 @@
     async function checkHIBP(password) {
       const warning = document.getElementById("breach-warning");
       const countDiv = document.getElementById("breach-count");
-      if (password.length === 0) {
+      if (!password) {
         warning.textContent = "";
         countDiv.innerHTML = "";
         return;
@@ -234,7 +235,7 @@
         const text = await response.text();
         const found = text.split("\n").find(line => line.startsWith(suffix));
         if (found) {
-          const count = found.split(":"")[1].trim();
+          const count = found.split(":")[1].trim();
           warning.innerHTML = `⚠️ This password was found in ${count} breaches.`;
           countDiv.innerHTML = `<progress value="${count}" max="1000000"></progress><br/><small>Higher count = more dangerous</small>`;
         } else {
@@ -242,17 +243,16 @@
           countDiv.innerHTML = "";
         }
       } catch (error) {
-        warning.textContent = "⚠️ Error checking password breach status.";
-        console.error(error);
+        warning.textContent = "⚠️ Error checking breach status.";
       }
     }
 
     async function sha1(str) {
       const encoder = new TextEncoder();
       const data = encoder.encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+      const hashBuffer = await crypto.subtle.digest("SHA-1", data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
     }
   </script>
 </body>
