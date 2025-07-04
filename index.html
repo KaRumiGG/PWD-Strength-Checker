@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Password Strength Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #1c1c1e;
+      padding: 30px 25px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
+      box-shadow: 0 4px 25px rgba(0, 255, 170, 0.15);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #00ffc3;
+      font-weight: 600;
+    }
+    .input-group {
+      position: relative;
+    }
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 13px 15px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      background: #2c2c2e;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .toggle-visibility {
+      position: absolute;
+      right: 12px;
+      top: 13px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #aaa;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .toggle-visibility:hover {
+      color: #00ffc3;
+    }
+    #strength-bar {
+      width: 100%;
+      height: 14px;
+      background: #444;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    #bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #ff4d4d, #ffaa00, #ffee00, #80ff80, #00ff99);
+      transition: width 0.3s ease-in-out;
+      border-radius: 6px;
+    }
+    #feedback {
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    #emoji {
+      font-size: 20px;
+      margin-left: 8px;
+    }
+    .checklist {
+      text-align: left;
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 20px;
+      list-style: none;
+    }
+    .checklist li {
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+      transition: color 0.3s;
+    }
+    .checklist li::before {
+      content: "❌";
+      position: absolute;
+      left: 0;
+      color: #ff6b6b;
+      transition: color 0.3s;
+    }
+    .checklist .met {
+      color: #a3ffb4;
+    }
+    .checklist .met::before {
+      content: "✅";
+      color: #00ff8c;
+    }
+    #breach-warning {
+      color: #ff4c4c;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Password Strength Checker</h2>
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Enter password" oninput="checkStrength()" />
+      <span class="toggle-visibility" onclick="toggleVisibility()">Show</span>
+    </div>
+    <div id="strength-bar"><div id="bar-fill"></div></div>
+    <p id="feedback">Start typing... <span id="emoji">🔒</span></p>
+    <ul class="checklist">
+      <li id="length">At least 8 characters</li>
+      <li id="uppercase">At least 1 uppercase letter</li>
+      <li id="lowercase">At least 1 lowercase letter</li>
+      <li id="number">At least 1 number</li>
+      <li id="special">At least 1 special character</li>
+    </ul>
+    <p id="breach-warning"></p>
+  </div>
+
+  <!-- JavaScript: unchanged -->
+  <!-- Keep your current JS as-is (you can paste yours here or leave it unchanged) -->
+</body>
+</html>
