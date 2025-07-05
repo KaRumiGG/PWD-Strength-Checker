@@ -78,16 +78,8 @@
       margin-top: 15px;
     }
     .checklist li { margin-bottom: 5px; }
-    .checklist .met {
-      color: #7CFC00;
-    }
-    .checklist .met::before {
-      content: "✅ ";
-    }
-    .checklist li:not(.met)::before {
-      content: "❌ ";
-    }
-    button, select, label.salt-toggle {
+    .checklist .met { color: #7CFC00; }
+    button, select {
       background: #8be9fd;
       color: #1e1e1e;
       border: none;
@@ -98,9 +90,8 @@
       transition: background 0.3s;
       margin-top: 10px;
       margin-right: 6px;
-      display: inline-block;
     }
-    button:hover, select:hover, label.salt-toggle:hover {
+    button:hover, select:hover {
       background: #50fa7b;
     }
     #breach-warning {
@@ -119,14 +110,8 @@
       word-wrap: break-word;
       color: #00ffff;
     }
-    .salt-section {
-      margin-top: 10px;
-    }
-    .salt-section input[type="checkbox"] {
-      margin-right: 6px;
-      transform: scale(1.2);
-    }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -138,11 +123,11 @@
     <div id="strength-bar"><div id="bar-fill"></div></div>
     <p id="feedback">Start typing... <span id="emoji">🔒</span></p>
     <ul class="checklist">
-      <li id="length">At least 8 characters</li>
-      <li id="uppercase">At least 1 uppercase letter</li>
-      <li id="lowercase">At least 1 lowercase letter</li>
-      <li id="number">At least 1 number</li>
-      <li id="special">At least 1 special character</li>
+      <li id="length">❌ At least 8 characters</li>
+      <li id="uppercase">❌ At least 1 uppercase letter</li>
+      <li id="lowercase">❌ At least 1 lowercase letter</li>
+      <li id="number">❌ At least 1 number</li>
+      <li id="special">❌ At least 1 special character</li>
     </ul>
     <p id="breach-warning"></p>
     <div id="breach-count"></div>
@@ -150,6 +135,7 @@
     <div>
       <button onclick="generatePassword()">Generate Password</button>
       <button onclick="copyPassword()">Copy to Clipboard</button>
+      <button onclick="saltPassword()">Salt Password</button>
     </div>
 
     <div style="margin-top: 15px;">
@@ -159,11 +145,6 @@
       </select>
       <button onclick="hashPassword()">Hash Password</button>
     </div>
-
-    <div class="salt-section">
-      <label class="salt-toggle"><input type="checkbox" id="useSalt" /> Enable Salt</label>
-    </div>
-
     <div id="hash-output"></div>
   </div>
 
@@ -243,6 +224,16 @@
       });
     }
 
+    function saltPassword() {
+      const pwdField = document.getElementById("password");
+      const pwd = pwdField.value;
+      if (!pwd) return;
+      const salt = Math.random().toString(36).substring(2, 8);
+      const salted = pwd + salt;
+      pwdField.value = salted;
+      checkStrength();
+    }
+
     async function checkHIBP(password) {
       const warning = document.getElementById("breach-warning");
       const countDiv = document.getElementById("breach-count");
@@ -282,36 +273,18 @@
     async function hashPassword() {
       const pwd = document.getElementById("password").value;
       const algo = document.getElementById("hashAlgo").value;
-      const useSalt = document.getElementById("useSalt").checked;
       const output = document.getElementById("hash-output");
       if (!pwd) return output.textContent = "Please enter a password first.";
 
-      let saltedPwd = pwd;
-      let salt = "";
-
-      if (useSalt) {
-        salt = generateSalt(8);
-        saltedPwd = pwd + salt;
-      }
-
       if (algo === "sha256") {
-        const encoded = new TextEncoder().encode(saltedPwd);
+        const encoded = new TextEncoder().encode(pwd);
         const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        output.textContent = `SHA-256${useSalt ? " (Salted)" : ""}: ${hashHex}${useSalt ? `\nSalt: ${salt}` : ""}`;
+        output.textContent = `SHA-256: ${hashHex}`;
       } else if (algo === "md5") {
-        output.textContent = "MD5 hashing requires a third-party library in the browser.";
+        output.textContent = `MD5: ${md5(pwd)}`;
       }
-    }
-
-    function generateSalt(length) {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      let result = "";
-      for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
     }
   </script>
 </body>
