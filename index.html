@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Password Strength Checker</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -25,7 +26,7 @@
       text-align: center;
       box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
     }
-    h2 { margin-bottom: 20px; color: #8be9fd; }
+    h2 { margin-bottom: 20px; color: #00e6e6; }
     .input-group { position: relative; }
     input[type="password"], input[type="text"] {
       width: 100%;
@@ -78,7 +79,14 @@
       margin-top: 15px;
     }
     .checklist li { margin-bottom: 5px; }
-    .checklist .met { color: #7CFC00; }
+    .checklist .met::before {
+      content: '✅ ';
+      color: #7CFC00;
+    }
+    .checklist li:not(.met)::before {
+      content: '❌ ';
+      color: #ff4c4c;
+    }
     button, select {
       background: #8be9fd;
       color: #1e1e1e;
@@ -111,7 +119,6 @@
       color: #00ffff;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -123,19 +130,19 @@
     <div id="strength-bar"><div id="bar-fill"></div></div>
     <p id="feedback">Start typing... <span id="emoji">🔒</span></p>
     <ul class="checklist">
-      <li id="length">❌ At least 8 characters</li>
-      <li id="uppercase">❌ At least 1 uppercase letter</li>
-      <li id="lowercase">❌ At least 1 lowercase letter</li>
-      <li id="number">❌ At least 1 number</li>
-      <li id="special">❌ At least 1 special character</li>
+      <li id="length">At least 8 characters</li>
+      <li id="uppercase">At least 1 uppercase letter</li>
+      <li id="lowercase">At least 1 lowercase letter</li>
+      <li id="number">At least 1 number</li>
+      <li id="special">At least 1 special character</li>
     </ul>
     <p id="breach-warning"></p>
     <div id="breach-count"></div>
 
     <div>
       <button onclick="generatePassword()">Generate Password</button>
-      <button onclick="copyPassword()">Copy to Clipboard</button>
       <button onclick="saltPassword()">Salt Password</button>
+      <button onclick="copyPassword()">Copy to Clipboard</button>
     </div>
 
     <div style="margin-top: 15px;">
@@ -186,6 +193,7 @@
       barFill.style.width = `${widthPercent}%`;
       barFill.style.background = color;
       feedback.innerHTML = `${text} <span id="emoji">${icon}</span>`;
+
       checkHIBP(password);
     }
 
@@ -216,22 +224,25 @@
       checkStrength();
     }
 
+    function saltPassword() {
+      let pwd = document.getElementById("password").value;
+      if (!/[A-Z]/.test(pwd)) pwd += 'A';
+      if (!/[a-z]/.test(pwd)) pwd += 'a';
+      if (!/[0-9]/.test(pwd)) pwd += '1';
+      if (!/[^A-Za-z0-9]/.test(pwd)) pwd += '!';
+      while (pwd.length < 12) {
+        pwd += Math.random().toString(36).charAt(2);
+      }
+      document.getElementById("password").value = pwd;
+      checkStrength();
+    }
+
     function copyPassword() {
       const password = document.getElementById("password").value;
       if (!password) return alert("No password to copy.");
       navigator.clipboard.writeText(password).then(() => {
         alert("Password copied to clipboard!");
       });
-    }
-
-    function saltPassword() {
-      const pwdField = document.getElementById("password");
-      const pwd = pwdField.value;
-      if (!pwd) return;
-      const salt = Math.random().toString(36).substring(2, 8);
-      const salted = pwd + salt;
-      pwdField.value = salted;
-      checkStrength();
     }
 
     async function checkHIBP(password) {
@@ -250,40 +261,35 @@
         const text = await response.text();
         const found = text.split("\n").find(line => line.startsWith(suffix));
         if (found) {
-          const count = found.split(":")[1].trim();
-          warning.innerHTML = `⚠️ This password was found in ${count} breaches.`;
-          countDiv.innerHTML = `<progress value="${count}" max="1000000"></progress><br/><small>Higher count = more dangerous</small>`;
+          const count = found.split(":")[1];
+          warning.textContent = `⚠️ This password was found in known breaches.`;
+          countDiv.innerHTML = `Seen <strong>${count}</strong> times.`;
         } else {
-          warning.textContent = `✅ This password was not found in known breaches.`;
+          warning.innerHTML = `✅ This password was not found in known breaches.`;
           countDiv.innerHTML = "";
         }
-      } catch (error) {
-        warning.textContent = "⚠️ Error checking breach status.";
+      } catch (e) {
+        warning.textContent = "⚠️ Unable to check password breaches right now.";
+        countDiv.innerHTML = "";
       }
     }
 
-    async function sha1(str) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(str);
-      const hashBuffer = await crypto.subtle.digest("SHA-1", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    function sha1(str) {
+      const buffer = new TextEncoder("utf-8").encode(str);
+      return crypto.subtle.digest("SHA-1", buffer).then(hash => {
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
+      });
     }
 
-    async function hashPassword() {
-      const pwd = document.getElementById("password").value;
+    function hashPassword() {
+      const password = document.getElementById("password").value;
       const algo = document.getElementById("hashAlgo").value;
       const output = document.getElementById("hash-output");
-      if (!pwd) return output.textContent = "Please enter a password first.";
-
+      if (!password) return;
       if (algo === "sha256") {
-        const encoded = new TextEncoder().encode(pwd);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        output.textContent = `SHA-256: ${hashHex}`;
+        output.textContent = "SHA-256: " + CryptoJS.SHA256(password);
       } else if (algo === "md5") {
-        output.textContent = `MD5: ${md5(pwd)}`;
+        output.textContent = "MD5: " + CryptoJS.MD5(password);
       }
     }
   </script>
