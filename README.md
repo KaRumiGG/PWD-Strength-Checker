@@ -1,69 +1,75 @@
-# PWD-Strength-Checker
-🔐 Password Strength Checker
-A modern web application designed to help users create strong, secure passwords and check if they’ve appeared in known data breaches.
+# 🔐 Password Strength Checker
 
-🚀 Live Demo
-👉 Click here to try it out on GitHub Pages
+A sleek and responsive web tool that helps users evaluate password strength and check if passwords have appeared in known data breaches.
 
-🛡️ Overview
-This tool provides real-time feedback on password strength using multiple criteria:
+---
 
-✅ Minimum length of 8 characters
+## 🌐 [Live Demo](https://your-github-username.github.io/Password-Strength-Checker/)
 
-✅ Contains both uppercase and lowercase letters
+---
 
-✅ Includes numbers and special characters
+## 📋 Overview
 
-✅ Checks password against known data breaches using the HaveIBeenPwned API (k-anonymity safe)
+This app checks password strength based on:
 
-✨ Features
-Live Strength Bar: Dynamic visual feedback that updates as you type
+- **Length** (minimum 8 characters)
+- **Uppercase & lowercase letters**
+- **Numbers**
+- **Special characters**
+- **Appearance in known breaches** (via [HaveIBeenPwned API](https://haveibeenpwned.com/API/v3))
 
-Emoji-Based Feedback: Friendly emojis to reflect password quality
+---
 
-Checklist Validation: See exactly which criteria your password meets
+## ✨ Features
 
-Data Breach Detection: Passwords checked against breached data (privacy-respecting)
+✅ Real-time strength meter with color feedback  
+✅ Checklist that updates as you type  
+✅ Emoji-based feedback  
+✅ Show/hide password toggle  
+✅ Password generator & salting feature  
+✅ SHA-256 / MD5 hash generator  
+✅ Animated starry background  
+✅ Safe breach check using k-anonymity method  
 
-Password Generation: Create secure passwords on demand
+---
 
-Salting Utility: Strengthen existing passwords with extra complexity
+## 💻 Tech Stack
 
-Hash Generator: Generate SHA-256 or MD5 hashes for any password
+- **HTML, CSS, JavaScript**
+- **Canvas API** – for animated background
+- **CryptoJS** – password hashing
+- **HaveIBeenPwned API** – breach validation
 
-Toggle Visibility: Easily show or hide password input
+---
 
-Starry Background: Smooth animated starfield for a sleek UI
+## 📸 Preview
 
-🛠️ Tech Stack
-HTML/CSS/JavaScript
+![Password Strength Checker UI](./your-screenshot.png)
 
-CryptoJS – for secure hash generation
+---
 
-HaveIBeenPwned API – breach validation
+## 🧠 Use Cases
 
-Canvas – animated background for visual appeal
+This project is ideal for:
 
-📸 Preview
+- Security awareness and training  
+- Cybersecurity coursework  
+- Showcasing frontend + security integration  
+- Portfolio / resume enhancement  
+- GitHub Pages deployment project
 
-A modern, elegant UI with real-time feedback and visual enhancements.
+---
 
-👨‍💻 About the Creator
-Akram Hassan – Cybersecurity Enthusiast | Intern @ Freddie Mac
-📎 LinkedIn
+## 👨‍💻 About the Creator
 
-📌 Use Case
-Perfect for:
+**Akram Hassan**  
+Cybersecurity Penetration Tester Intern @ Freddie Mac  
+📎 [LinkedIn Profile](https://www.linkedin.com/in/ahassa)
 
-Security awareness demos
+---
 
-Personal security tools
+## 🔐 Privacy Note
 
-Cybersecurity student projects
+No password data is stored or transmitted. Breach checks use a secure k-anonymity model, keeping your password safe and anonymous.
 
-Resume/portfolio enhancement
-
-Teaching secure password hygiene
-
-🔒 Disclaimer
-This tool is client-side only. No passwords are stored or sent to a server. Breach checks use SHA-1 k-anonymity, ensuring your passwords remain private.
+---
