@@ -26,7 +26,7 @@ This app checks password strength based on:
 ✅ Checklist that updates as you type  
 ✅ Emoji-based feedback  
 ✅ Show/hide password toggle  
-✅ Password generator & salting feature  
+✅ Password generator & enhancing feature 
 ✅ SHA-256 / MD5 hash generator  
 ✅ Animated starry background  
 ✅ Safe breach check using k-anonymity method  
