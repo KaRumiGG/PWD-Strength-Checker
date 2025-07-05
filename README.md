@@ -4,7 +4,7 @@ A sleek and responsive web tool that helps users evaluate password strength and 
 
 ---
 
-## 🌐 [Live Demo](https://karumigg.github.io/PWD-Strength-Checker/)
+## 🌐 [Live Demo](https://karumigg.github.io/StrongPassify/)
 
 ---
 
