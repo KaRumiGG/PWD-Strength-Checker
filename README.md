@@ -68,6 +68,10 @@ Cybersecurity Penetration Tester Intern @ Freddie Mac
 
 ---
 
+## 🙌 Credits
+This project was built as part of my learning journey in cybersecurity and web development.
+Feel free to use or adapt the code — just kindly credit the original creator. 😊
+
 ## 🔐 Privacy Note
 
 No password data is stored or transmitted. Breach checks use a secure k-anonymity model, keeping your password safe and anonymous.
