@@ -74,9 +74,17 @@
       font-size: 14px;
       margin-top: 15px;
     }
-    .checklist li { margin-bottom: 5px; color: #ccc; }
-    .checklist .met {
+    .checklist li {
+      margin-bottom: 5px;
+      color: #ccc;
+    }
+    .checklist .met::before {
+      content: "✅ ";
       color: #00ff99;
+    }
+    .checklist li:not(.met)::before {
+      content: "❌ ";
+      color: #ff6b6b;
     }
     button, select {
       background: #00f2ff;
@@ -112,11 +120,11 @@
     <div id="strength-bar"><div id="bar-fill"></div></div>
     <p id="feedback">Start typing... <span id="emoji">🔒</span></p>
     <ul class="checklist">
-      <li id="length">❌ At least 8 characters</li>
-      <li id="uppercase">❌ At least 1 uppercase letter</li>
-      <li id="lowercase">❌ At least 1 lowercase letter</li>
-      <li id="number">❌ At least 1 number</li>
-      <li id="special">❌ At least 1 special character</li>
+      <li id="length">At least 8 characters</li>
+      <li id="uppercase">At least 1 uppercase letter</li>
+      <li id="lowercase">At least 1 lowercase letter</li>
+      <li id="number">At least 1 number</li>
+      <li id="special">At least 1 special character</li>
     </ul>
     <p id="breach-warning"></p>
     <div id="breach-count"></div>
