@@ -10,12 +10,15 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      margin: 0;
+      background: #0d1117;
       color: #f8f8f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      z-index: -1;
     }
     .container {
       background: rgba(33, 33, 52, 0.95);
@@ -25,6 +28,8 @@
       width: 100%;
       text-align: center;
       box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
+      margin: 60px auto;
+      z-index: 1;
     }
     h2 { margin-bottom: 20px; color: #00e6e6; }
     .input-group { position: relative; }
@@ -118,9 +123,24 @@
       word-wrap: break-word;
       color: #00ffff;
     }
+    footer {
+      text-align: center;
+      color: #ccc;
+      font-size: 12px;
+      margin-top: 30px;
+    }
+    footer a {
+      color: #8be9fd;
+      text-decoration: none;
+    }
+    footer a:hover {
+      color: #50fa7b;
+    }
   </style>
 </head>
 <body>
+  <canvas id="bg"></canvas>
+
   <div class="container">
     <h2>Create a Password</h2>
     <div class="input-group">
@@ -154,6 +174,10 @@
     </div>
     <div id="hash-output"></div>
   </div>
+
+  <footer>
+    Created by <a href="https://www.linkedin.com/in/akramhassan1" target="_blank">Akram Hassan</a> • Inspired by Cybersecurity Passion 🚀
+  </footer>
 
   <script>
     function checkStrength() {
@@ -193,7 +217,6 @@
       barFill.style.width = `${widthPercent}%`;
       barFill.style.background = color;
       feedback.innerHTML = `${text} <span id="emoji">${icon}</span>`;
-
       checkHIBP(password);
     }
 
@@ -226,13 +249,20 @@
 
     function saltPassword() {
       let pwd = document.getElementById("password").value;
-      if (!/[A-Z]/.test(pwd)) pwd += 'A';
-      if (!/[a-z]/.test(pwd)) pwd += 'a';
-      if (!/[0-9]/.test(pwd)) pwd += '1';
-      if (!/[^A-Za-z0-9]/.test(pwd)) pwd += '!';
-      while (pwd.length < 12) {
-        pwd += Math.random().toString(36).charAt(2);
-      }
+      if (!pwd) return;
+
+      const lower = "abcdefghijklmnopqrstuvwxyz";
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const nums = "0123456789";
+      const special = "!@#$%^&*()-_=+[]{};:,.<>?";
+      const all = lower + upper + nums + special;
+
+      if (!/[A-Z]/.test(pwd)) pwd += upper[Math.floor(Math.random() * upper.length)];
+      if (!/[a-z]/.test(pwd)) pwd += lower[Math.floor(Math.random() * lower.length)];
+      if (!/[0-9]/.test(pwd)) pwd += nums[Math.floor(Math.random() * nums.length)];
+      if (!/[^A-Za-z0-9]/.test(pwd)) pwd += special[Math.floor(Math.random() * special.length)];
+      while (pwd.length < 12) pwd += all[Math.floor(Math.random() * all.length)];
+
       document.getElementById("password").value = pwd;
       checkStrength();
     }
@@ -262,36 +292,80 @@
         const found = text.split("\n").find(line => line.startsWith(suffix));
         if (found) {
           const count = found.split(":")[1];
-          warning.textContent = `⚠️ This password was found in known breaches.`;
-          countDiv.innerHTML = `Seen <strong>${count}</strong> times.`;
+          warning.textContent = "⚠️ This password has been seen in data breaches!";
+          countDiv.innerHTML = `It appeared <strong>${count}</strong> times in known breaches.`;
         } else {
-          warning.innerHTML = `✅ This password was not found in known breaches.`;
+          warning.innerHTML = "✅ This password was not found in known breaches.";
           countDiv.innerHTML = "";
         }
       } catch (e) {
-        warning.textContent = "⚠️ Unable to check password breaches right now.";
-        countDiv.innerHTML = "";
+        warning.textContent = "Error checking breach status.";
       }
     }
 
-    function sha1(str) {
+    async function sha1(str) {
       const buffer = new TextEncoder("utf-8").encode(str);
-      return crypto.subtle.digest("SHA-1", buffer).then(hash => {
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
-      });
+      const hashBuffer = await crypto.subtle.digest("SHA-1", buffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
     }
 
     function hashPassword() {
       const password = document.getElementById("password").value;
       const algo = document.getElementById("hashAlgo").value;
       const output = document.getElementById("hash-output");
-      if (!password) return;
-      if (algo === "sha256") {
-        output.textContent = "SHA-256: " + CryptoJS.SHA256(password);
-      } else if (algo === "md5") {
-        output.textContent = "MD5: " + CryptoJS.MD5(password);
+
+      if (!password) {
+        output.textContent = "Please enter a password first.";
+        return;
+      }
+
+      if (algo === "md5") {
+        output.textContent = "MD5: " + CryptoJS.MD5(password).toString();
+      } else if (algo === "sha256") {
+        output.textContent = "SHA-256: " + CryptoJS.SHA256(password).toString();
+      } else {
+        output.textContent = "Unknown hash algorithm.";
       }
     }
+
+    // Star animation
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 80; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.5 + 0.5,
+        speed: Math.random() * 0.3 + 0.1
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
   </script>
 </body>
 </html>
