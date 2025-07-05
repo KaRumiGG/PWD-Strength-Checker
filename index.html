@@ -5,27 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Password Strength Checker</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
-      color: #f8f8f8;
+      background: linear-gradient(to right, #1a1a2e, #16213e, #0f3460);
+      color: #e5e5e5;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
     .container {
-      background: rgba(33, 33, 52, 0.95);
+      background: #202040;
       padding: 30px;
       border-radius: 15px;
-      max-width: 460px;
+      max-width: 480px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.1);
     }
-    h2 { margin-bottom: 20px; color: #8be9fd; }
+    h2 { margin-bottom: 20px; color: #00f2ff; }
     .input-group { position: relative; }
     input[type="password"], input[type="text"] {
       width: 100%;
@@ -34,7 +35,7 @@
       border: none;
       outline: none;
       font-size: 16px;
-      background: #3c3f58;
+      background: #2d2d4d;
       color: #fff;
       margin-bottom: 10px;
     }
@@ -44,28 +45,25 @@
       top: 12px;
       cursor: pointer;
       font-size: 14px;
-      color: #bbb;
-      user-select: none;
+      color: #ccc;
     }
     #strength-bar {
       width: 100%;
       height: 12px;
-      background: #555;
+      background: #444;
       border-radius: 6px;
-      overflow: hidden;
       margin-bottom: 8px;
+      overflow: hidden;
     }
     #bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(to right, #ff4d4d, #ffa94d, #f6f94d, #4dfc58, #4dffc2);
-      transition: width 0.3s ease-in-out;
-      border-radius: 6px;
+      background: linear-gradient(to right, red, orange, yellow, lightgreen, lime);
+      transition: width 0.3s;
     }
     #feedback {
       font-size: 14px;
       margin-bottom: 10px;
-      color: #ddd;
     }
     #emoji {
       font-size: 20px;
@@ -74,36 +72,28 @@
     .checklist {
       text-align: left;
       font-size: 14px;
-      color: #ccc;
       margin-top: 15px;
     }
-    .checklist li { margin-bottom: 5px; }
-    .checklist .met { color: #7CFC00; }
+    .checklist li { margin-bottom: 5px; color: #ccc; }
+    .checklist .met {
+      color: #00ff99;
+    }
     button, select {
-      background: #8be9fd;
-      color: #1e1e1e;
+      background: #00f2ff;
+      color: #202040;
       border: none;
       padding: 8px 14px;
       border-radius: 6px;
-      cursor: pointer;
       font-weight: bold;
-      transition: background 0.3s;
+      cursor: pointer;
       margin-top: 10px;
       margin-right: 6px;
     }
     button:hover, select:hover {
-      background: #50fa7b;
+      background: #00ffcc;
     }
-    #breach-warning {
-      color: #ff4c4c;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    #breach-count {
-      color: #aaa;
-      margin-top: 6px;
-      font-size: 13px;
-    }
+    #breach-warning { color: #ff6b6b; margin-top: 10px; font-size: 14px; }
+    #breach-count { font-size: 13px; margin-top: 6px; color: #aaa; }
     #hash-output {
       margin-top: 12px;
       font-size: 13px;
@@ -153,18 +143,13 @@
       const feedback = document.getElementById("feedback");
       const emoji = document.getElementById("emoji");
 
-      let strength = 0;
       const hasLength = password.length >= 8;
       const hasUpper = /[A-Z]/.test(password);
       const hasLower = /[a-z]/.test(password);
       const hasNumber = /[0-9]/.test(password);
       const hasSpecial = /[^A-Za-z0-9]/.test(password);
 
-      if (hasLength) strength++;
-      if (hasUpper) strength++;
-      if (hasLower) strength++;
-      if (hasNumber) strength++;
-      if (hasSpecial) strength++;
+      let strength = [hasLength, hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
 
       document.getElementById("length").className = hasLength ? "met" : "";
       document.getElementById("uppercase").className = hasUpper ? "met" : "";
@@ -174,24 +159,24 @@
 
       const widthPercent = (strength / 5) * 100;
       let color = "gray", text = "Start typing...", icon = "🔒";
-      switch (strength) {
-        case 1: color = "red"; text = "Very Weak"; icon = "😬"; break;
-        case 2: color = "orange"; text = "Weak"; icon = "😕"; break;
-        case 3: color = "yellow"; text = "Moderate"; icon = "🙂"; break;
-        case 4: color = "lightgreen"; text = "Strong"; icon = "😊"; break;
-        case 5: color = "limegreen"; text = "Very Strong"; icon = "😎"; break;
-      }
+      if (strength === 1) { color = "red"; text = "Very Weak"; icon = "😬"; }
+      if (strength === 2) { color = "orange"; text = "Weak"; icon = "😕"; }
+      if (strength === 3) { color = "yellow"; text = "Moderate"; icon = "🙂"; }
+      if (strength === 4) { color = "lightgreen"; text = "Strong"; icon = "😊"; }
+      if (strength === 5) { color = "limegreen"; text = "Very Strong"; icon = "😎"; }
+
       barFill.style.width = `${widthPercent}%`;
       barFill.style.background = color;
       feedback.innerHTML = `${text} <span id="emoji">${icon}</span>`;
+
       checkHIBP(password);
     }
 
     function toggleVisibility() {
-      const passwordInput = document.getElementById("password");
+      const input = document.getElementById("password");
       const toggle = document.querySelector(".toggle-visibility");
-      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-      toggle.textContent = passwordInput.type === "password" ? "Show" : "Hide";
+      input.type = input.type === "password" ? "text" : "password";
+      toggle.textContent = input.type === "password" ? "Show" : "Hide";
     }
 
     function generatePassword() {
@@ -258,20 +243,17 @@
       return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
     }
 
-    async function hashPassword() {
+    function hashPassword() {
       const pwd = document.getElementById("password").value;
       const algo = document.getElementById("hashAlgo").value;
       const output = document.getElementById("hash-output");
       if (!pwd) return output.textContent = "Please enter a password first.";
-
       if (algo === "sha256") {
-        const encoded = new TextEncoder().encode(pwd);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        output.textContent = `SHA-256: ${hashHex}`;
+        const hash = CryptoJS.SHA256(pwd).toString();
+        output.textContent = `SHA-256: ${hash}`;
       } else if (algo === "md5") {
-        output.textContent = "MD5 hashing requires a third-party library in the browser.";
+        const hash = CryptoJS.MD5(pwd).toString();
+        output.textContent = `MD5: ${hash}`;
       }
     }
   </script>
