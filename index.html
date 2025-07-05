@@ -20,7 +20,7 @@
       background: rgba(33, 33, 52, 0.95);
       padding: 30px;
       border-radius: 15px;
-      max-width: 440px;
+      max-width: 460px;
       width: 100%;
       text-align: center;
       box-shadow: 0 0 25px rgba(138, 43, 226, 0.3);
@@ -79,7 +79,7 @@
     }
     .checklist li { margin-bottom: 5px; }
     .checklist .met { color: #7CFC00; }
-    button {
+    button, select {
       background: #8be9fd;
       color: #1e1e1e;
       border: none;
@@ -91,7 +91,7 @@
       margin-top: 10px;
       margin-right: 6px;
     }
-    button:hover {
+    button:hover, select:hover {
       background: #50fa7b;
     }
     #breach-warning {
@@ -103,6 +103,12 @@
       color: #aaa;
       margin-top: 6px;
       font-size: 13px;
+    }
+    #hash-output {
+      margin-top: 12px;
+      font-size: 13px;
+      word-wrap: break-word;
+      color: #00ffff;
     }
   </style>
 </head>
@@ -124,10 +130,20 @@
     </ul>
     <p id="breach-warning"></p>
     <div id="breach-count"></div>
+
     <div>
       <button onclick="generatePassword()">Generate Password</button>
       <button onclick="copyPassword()">Copy to Clipboard</button>
     </div>
+
+    <div style="margin-top: 15px;">
+      <select id="hashAlgo">
+        <option value="sha256">SHA-256</option>
+        <option value="md5">MD5</option>
+      </select>
+      <button onclick="hashPassword()">Hash Password</button>
+    </div>
+    <div id="hash-output"></div>
   </div>
 
   <script>
@@ -150,45 +166,32 @@
       if (hasNumber) strength++;
       if (hasSpecial) strength++;
 
-      document.getElementById("length").innerHTML = hasLength ? "✅ At least 8 characters" : "❌ At least 8 characters";
       document.getElementById("length").className = hasLength ? "met" : "";
-      document.getElementById("uppercase").innerHTML = hasUpper ? "✅ At least 1 uppercase letter" : "❌ At least 1 uppercase letter";
       document.getElementById("uppercase").className = hasUpper ? "met" : "";
-      document.getElementById("lowercase").innerHTML = hasLower ? "✅ At least 1 lowercase letter" : "❌ At least 1 lowercase letter";
       document.getElementById("lowercase").className = hasLower ? "met" : "";
-      document.getElementById("number").innerHTML = hasNumber ? "✅ At least 1 number" : "❌ At least 1 number";
       document.getElementById("number").className = hasNumber ? "met" : "";
-      document.getElementById("special").innerHTML = hasSpecial ? "✅ At least 1 special character" : "❌ At least 1 special character";
       document.getElementById("special").className = hasSpecial ? "met" : "";
 
       const widthPercent = (strength / 5) * 100;
       let color = "gray", text = "Start typing...", icon = "🔒";
       switch (strength) {
-        case 0:
         case 1: color = "red"; text = "Very Weak"; icon = "😬"; break;
         case 2: color = "orange"; text = "Weak"; icon = "😕"; break;
         case 3: color = "yellow"; text = "Moderate"; icon = "🙂"; break;
         case 4: color = "lightgreen"; text = "Strong"; icon = "😊"; break;
         case 5: color = "limegreen"; text = "Very Strong"; icon = "😎"; break;
       }
-
       barFill.style.width = `${widthPercent}%`;
       barFill.style.background = color;
       feedback.innerHTML = `${text} <span id="emoji">${icon}</span>`;
-
       checkHIBP(password);
     }
 
     function toggleVisibility() {
       const passwordInput = document.getElementById("password");
       const toggle = document.querySelector(".toggle-visibility");
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        toggle.textContent = "Hide";
-      } else {
-        passwordInput.type = "password";
-        toggle.textContent = "Show";
-      }
+      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+      toggle.textContent = passwordInput.type === "password" ? "Show" : "Hide";
     }
 
     function generatePassword() {
@@ -253,6 +256,23 @@
       const hashBuffer = await crypto.subtle.digest("SHA-1", data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+
+    async function hashPassword() {
+      const pwd = document.getElementById("password").value;
+      const algo = document.getElementById("hashAlgo").value;
+      const output = document.getElementById("hash-output");
+      if (!pwd) return output.textContent = "Please enter a password first.";
+
+      if (algo === "sha256") {
+        const encoded = new TextEncoder().encode(pwd);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        output.textContent = `SHA-256: ${hashHex}`;
+      } else if (algo === "md5") {
+        output.textContent = "MD5 hashing requires a third-party library in the browser.";
+      }
     }
   </script>
 </body>
