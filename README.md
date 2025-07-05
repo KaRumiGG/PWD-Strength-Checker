@@ -70,7 +70,7 @@ Cybersecurity Penetration Tester Intern @ Freddie Mac
 
 ## 🙌 Credits
 This project was built as part of my learning journey in cybersecurity and web development.
-Feel free to use or adapt the code — just kindly credit the original creator. 😊
+Feel free to use or adapt the code 😊
 
 ## 🔐 Privacy Note
 
